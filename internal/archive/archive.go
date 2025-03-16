@@ -3,10 +3,11 @@ package archive
 import (
 	"fmt"
 	"github.com/cavaliergopher/grab/v3"
+	"github.com/goccy/go-yaml"
 	"github.com/kittenbark/nanodb"
 	"github.com/kittenbark/tg"
 	"github.com/kittenbark/tikwm/lib"
-	"gopkg.in/yaml.v3"
+	"io"
 	"log/slog"
 	"math/rand"
 	"os"
@@ -32,17 +33,17 @@ func New(config, archive, downloaded, errors string) (*Archive, error) {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
-	db, err := nanodb.Fromf[*User](archive, yaml.NewEncoder, yaml.NewDecoder)
+	db, err := nanodb.Fromf[*User](archive, yamlNewEncoder, yamlNewDecoder)
 	if err != nil {
 		return nil, fmt.Errorf("users: open archive, %w", err)
 	}
 
-	downloadedDb, err := nanodb.Fromf[*DownloadedPost](downloaded, yaml.NewEncoder, yaml.NewDecoder)
+	downloadedDb, err := nanodb.Fromf[*DownloadedPost](downloaded, yamlNewEncoder, yamlNewDecoder)
 	if err != nil {
 		return nil, fmt.Errorf("users: open downloaded, %w", err)
 	}
 
-	errorsDb, err := nanodb.Fromf[*PostError](errors, yaml.NewEncoder, yaml.NewDecoder)
+	errorsDb, err := nanodb.Fromf[*PostError](errors, yamlNewEncoder, yamlNewDecoder)
 	if err != nil {
 		return nil, fmt.Errorf("users: open errors, %w", err)
 	}
@@ -152,6 +153,7 @@ func (arch *Archive) DownloadUser(tag string) error {
 				arch.newError(post, tag, fmt.Errorf("grab: get user post, %w (%s)", err, tag))
 				continue
 			}
+			pictures = append(pictures, filename)
 			time.Sleep(time.Millisecond * time.Duration(100+rand.Intn(200)))
 		}
 		if err := arch.downloaded.Add(post.Id, &DownloadedPost{
@@ -215,4 +217,12 @@ func (arch *Archive) picturePath(tag string, username string, post *tikwm.UserPo
 			i,
 		),
 	)
+}
+
+func yamlNewEncoder(w io.Writer) *yaml.Encoder {
+	return yaml.NewEncoder(w)
+}
+
+func yamlNewDecoder(r io.Reader) *yaml.Decoder {
+	return yaml.NewDecoder(r)
 }
