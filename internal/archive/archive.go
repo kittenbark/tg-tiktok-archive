@@ -1,7 +1,6 @@
 package archive
 
 import (
-	"context"
 	"fmt"
 	"github.com/cavaliergopher/grab/v3"
 	"github.com/kittenbark/nanodb"
@@ -12,7 +11,6 @@ import (
 	"math/rand"
 	"os"
 	"path"
-	"slices"
 	"time"
 )
 
@@ -21,9 +19,10 @@ type Archive struct {
 	tg         *tg.Bot
 	users      *nanodb.DBCache[*User, *yaml.Encoder, *yaml.Decoder]
 	downloaded *nanodb.DBCache[*DownloadedPost, *yaml.Encoder, *yaml.Decoder]
+	errors     *nanodb.DBCache[*PostError, *yaml.Encoder, *yaml.Decoder]
 }
 
-func New(config string, archive string, downloaded string) (*Archive, error) {
+func New(config, archive, downloaded, errors string) (*Archive, error) {
 	var cfg Config
 	data, err := os.ReadFile(config)
 	if err != nil {
@@ -43,13 +42,18 @@ func New(config string, archive string, downloaded string) (*Archive, error) {
 		return nil, fmt.Errorf("users: open downloaded, %w", err)
 	}
 
+	errorsDb, err := nanodb.Fromf[*PostError](errors, yaml.NewEncoder, yaml.NewDecoder)
+	if err != nil {
+		return nil, fmt.Errorf("users: open errors, %w", err)
+	}
+
 	bot := tg.New(&tg.Config{Token: cfg.Token, ApiURL: cfg.TelegramURL, TimeoutHandle: -1})
 	if _, err := tg.GetMe(bot.Context()); err != nil {
 		return nil, fmt.Errorf("get me: %w", err)
 	}
 
 	grab.DefaultClient.UserAgent = "Mozilla/5.0 (Linux; Android 14; RMX3710 Build/UKQ1.230924.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/133.0.6943.137 Mobile Safari/537.36 trill_390003 BytedanceWebview/d8a21c6"
-	return &Archive{&cfg, bot, db, downloadedDb}, nil
+	return &Archive{&cfg, bot, db, downloadedDb, errorsDb}, nil
 }
 
 func (arch *Archive) Start() {
@@ -102,15 +106,17 @@ func (arch *Archive) DownloadUser(tag string) error {
 
 	lastUpdate := time.Now()
 	for post, err := range tikwm.FeedSeq(user.Id) {
-		if err != nil {
-			return fmt.Errorf("tikwm: get user post, %w (%s)", err, tag)
+		if err != nil || post == nil {
+			arch.newError(post, tag, fmt.Errorf("tikwm: get user post, %w (%s)", err, tag))
+			continue
 		}
 		if time.Unix(post.CreateTime, 0).Before(user.LastUpdate) {
 			break
 		}
 		content := post.ContentUrls()
 		if len(content) == 0 {
-			return fmt.Errorf("tikwm: get user post, missing content urls (%s, %s)", tag, post.Id)
+			arch.newError(post, tag, fmt.Errorf("tikwm: get user post, missing content urls (%s, %s)", tag, post.Id))
+			continue
 		}
 
 		slog.Debug(
@@ -122,7 +128,8 @@ func (arch *Archive) DownloadUser(tag string) error {
 		if post.IsVideo() && len(content) > 0 {
 			filename := arch.videoPath(tag, user.Username, post)
 			if _, err := grab.Get(filename, content[0]); err != nil {
-				return fmt.Errorf("grab: get user post, %w (%s, %s)", err, tag, post.Id)
+				arch.newError(post, tag, fmt.Errorf("grab: get user post, %w (%s, %s)", err, tag, post.Id))
+				continue
 			}
 			if err := arch.downloaded.Add(post.Id, &DownloadedPost{
 				Id:         post.Id,
@@ -142,7 +149,8 @@ func (arch *Archive) DownloadUser(tag string) error {
 		for i := range content {
 			filename := arch.picturePath(tag, user.Username, post, i)
 			if _, err := grab.Get(filename, content[i]); err != nil {
-				return fmt.Errorf("grab: get user post, %w (%s)", err, tag)
+				arch.newError(post, tag, fmt.Errorf("grab: get user post, %w (%s)", err, tag))
+				continue
 			}
 			time.Sleep(time.Millisecond * time.Duration(100+rand.Intn(200)))
 		}
@@ -164,6 +172,22 @@ func (arch *Archive) DownloadUser(tag string) error {
 	}
 
 	return nil
+}
+
+func (arch *Archive) newError(post *tikwm.UserPost, tag string, err error) {
+	if post == nil {
+		post = &tikwm.UserPost{Id: fmt.Sprintf("%s_%s", tag, time.Now().Format("20060102150405"))}
+	}
+	slog.Error("archive#user", "post", post.Id, "tag", tag, "err", err)
+
+	if err := arch.errors.Add(post.Id, &PostError{
+		PostId:  post.Id,
+		UserTag: tag,
+		Error:   fmt.Sprintf("tikwm: get user post, %v (%s, %s)", err, tag, post.Id),
+	}); err != nil {
+		slog.Error("archive#new_error_write_error", "post", post.Id, "tag", tag, "err", err)
+	}
+	time.Sleep(time.Second * 10)
 }
 
 func (arch *Archive) videoPath(tag string, username string, post *tikwm.UserPost) string {
@@ -191,8 +215,4 @@ func (arch *Archive) picturePath(tag string, username string, post *tikwm.UserPo
 			i,
 		),
 	)
-}
-
-func (arch *Archive) onAdmin(ctx context.Context, upd *tg.Update) bool {
-	return tg.OnMessage(ctx, upd) && upd.Message.From != nil && slices.Contains(arch.cfg.Admins, upd.Message.From.Id)
 }

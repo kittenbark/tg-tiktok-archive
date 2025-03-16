@@ -2,6 +2,7 @@ package archive
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"github.com/kittenbark/tg"
 	"github.com/kittenbark/tgmedia/tgvideo"
@@ -114,4 +115,8 @@ func (arch *Archive) uploadPostTo(post *DownloadedPost, chatId int64, threadId i
 	}
 
 	return nil
+}
+
+func (arch *Archive) onAdmin(ctx context.Context, upd *tg.Update) bool {
+	return tg.OnMessage(ctx, upd) && upd.Message.From != nil && slices.Contains(arch.cfg.Admins, upd.Message.From.Id)
 }

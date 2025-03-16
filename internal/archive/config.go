@@ -30,3 +30,9 @@ type DownloadedPost struct {
 	CreateTime int64     `yaml:"create_time"`
 	DownloadAt time.Time `yaml:"download_at"`
 }
+
+type PostError struct {
+	PostId  string `yaml:"post_id"`
+	UserTag string `yaml:"user_tag"`
+	Error   string `yaml:"error"`
+}
