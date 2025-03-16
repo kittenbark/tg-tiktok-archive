@@ -1,4 +1,4 @@
-module tg-tiktok-archive
+module github.com/kittenbark/tg-tiktok-archive
 
 go 1.24
 

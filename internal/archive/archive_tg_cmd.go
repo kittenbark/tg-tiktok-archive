@@ -1,6 +1,7 @@
 package archive
 
 import (
+	"archive/tar"
 	"context"
 	"fmt"
 	"github.com/kittenbark/tg"
@@ -10,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func (arch *Archive) tgHandlerInfo(ctx context.Context, upd *tg.Update) error {
@@ -91,6 +93,76 @@ func (arch *Archive) tgHandlerAdd(ctx context.Context, upd *tg.Update) error {
 	return err
 }
 
+func (arch *Archive) tgHandlerBundle(ctx context.Context, upd *tg.Update) (err error) {
+	msg := upd.Message
+	defer func() {
+		if err != nil {
+			_, _ = tg.SendMessage(ctx, msg.Chat.Id, "sorry, unexpected error occurred")
+		}
+	}()
+	asReply := &tg.ReplyParameters{MessageId: msg.MessageId}
+
+	args := strings.Split(msg.Text, " ")
+	if len(args) != 2 {
+		_, err := tg.SendMessage(ctx, msg.Chat.Id, "wrong number of arguments, expected: /bundle losertron")
+		return err
+	}
+
+	tag := args[1]
+	_, ok, err := arch.users.TryGet(tag)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		_, err := tg.SendMessage(ctx, msg.Chat.Id, fmt.Sprintf("user with tag '%s' not found", tag))
+		return err
+	}
+
+	directory := path.Join(arch.cfg.Data, tag)
+	directorySize, err := calcDirSize(directory)
+	if err != nil {
+		return err
+	}
+	if directorySize > 1900<<20 {
+		_, err := tg.SendMessage(ctx, msg.Chat.Id, fmt.Sprintf("sorry, '%s' is too big for tg (%s)", tag, du(directory)))
+		return err
+	}
+
+	progress, err := tg.SendMessage(ctx, msg.Chat.Id, "packing..", &tg.OptSendMessage{ReplyParameters: asReply})
+	if err != nil {
+		return err
+	}
+	defer func(ctx context.Context, chatId int64, messageId int64) {
+		_, _ = tg.DeleteMessage(ctx, chatId, messageId)
+	}(ctx, msg.Chat.Id, progress.MessageId)
+
+	filename := fmt.Sprintf("%s_%s.tar", tag, time.Now().Format(time.DateOnly))
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+		_ = os.Remove(filename)
+	}(file)
+	bundle := tar.NewWriter(file)
+	defer func(writer *tar.Writer) { _ = writer.Close() }(bundle)
+
+	if err := bundle.AddFS(os.DirFS(directory)); err != nil {
+		return err
+	}
+	if err := bundle.Flush(); err != nil {
+		return err
+	}
+
+	_, _ = tg.EditMessageText(ctx, "uploading..", &tg.OptEditMessageText{
+		ChatId:    progress.Chat.Id,
+		MessageId: progress.MessageId,
+	})
+	_, err = tg.SendDocument(ctx, msg.Chat.Id, tg.FromDisk(filename), &tg.OptSendDocument{ReplyParameters: asReply})
+	return err
+}
+
 func (arch *Archive) tgHandlerDu(ctx context.Context, upd *tg.Update) error {
 	subdirs, err := os.ReadDir(arch.cfg.Data)
 	if err != nil {
@@ -117,7 +189,7 @@ func (arch *Archive) tgHandlerDu(ctx context.Context, upd *tg.Update) error {
 	return err
 }
 
-func du(dir string) string {
+func calcDirSize(dir string) (int64, error) {
 	size := int64(0)
 	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -133,8 +205,13 @@ func du(dir string) string {
 		size += info.Size()
 		return nil
 	})
+	return size, err
+}
+
+func du(dir string) string {
+	size, err := calcDirSize(dir)
 	if err != nil {
-		return err.Error()
+		return "<error>"
 	}
 
 	const unit = 1024

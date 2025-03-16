@@ -14,66 +14,6 @@ type TgArchive struct {
 	cfg *Config
 }
 
-// 			wg.Add(1)
-//			go func() {
-//				defer func() {
-//					wg.Done()
-//					if err := recover(); err != nil {
-//						slog.Error("archive#upload_user_panic", "tag", tag, "err", err)
-//					}
-//				}()
-//				if err := arch.UploadUser(tag, posts); err != nil {
-//					slog.Error("archive#upload_user", "tag", tag, "err", err, "posts", posts)
-//				}
-//			}()
-//			slog.Info("archive#user", "tag", tag)
-//
-//func (arch *TgArchive) UploadUser(tag string, posts [][]string) (err error) {
-//	user, err := arch.users.Get(tag)
-//	if err != nil {
-//		return fmt.Errorf("users: get user: %w", err)
-//	}
-//
-//	for _, userTg := range user.Tg {
-//		if userTg.ThreadId == 0 {
-//			topic, err := tg.CreateForumTopic(arch.tg.Context(), userTg.ChatId, tag)
-//			if err != nil {
-//				return fmt.Errorf("tg.CreateForumTopic, %w (%s)", err, tag)
-//			}
-//			userTg.ThreadId = topic.MessageThreadId
-//			if err := arch.users.Add(tag, user); err != nil {
-//				return fmt.Errorf("users: add user, %w (%s)", err, tag)
-//			}
-//		}
-//	}
-//
-//	slices.Reverse(posts)
-//
-//	for _, post := range posts {
-//		wg := &sync.WaitGroup{}
-//		for _, info := range user.Tg {
-//			wg.Add(1)
-//			go func() {
-//				for _, media := range post {
-//					var sendErr error
-//					if strings.HasSuffix(media, ".mp4") {
-//						_, sendErr = tgvideo.Send(arch.tg.Context(), info.ChatId, media, &tg.OptSendVideo{MessageThreadId: info.ThreadId})
-//					} else {
-//						_, sendErr = tg.SendDocument(arch.tg.Context(), info.ChatId, tg.FromDisk(media), &tg.OptSendDocument{MessageThreadId: info.ThreadId})
-//					}
-//					if sendErr != nil {
-//						err = sendErr
-//					}
-//				}
-//
-//			}()
-//		}
-//		wg.Wait()
-//	}
-//
-//	return nil
-//}
-
 func (arch *Archive) UploadTg() error {
 	posts, err := arch.downloaded.KeysSnapshot()
 	if err != nil {
@@ -106,9 +46,11 @@ func (arch *Archive) StartBot() {
 	arch.tg.
 		OnError(tg.OnErrorLog).
 		Scheduler().
+		Command("/start", tg.Synced(tg.CommonTextReply("hello, this bot archives stuff, source code is available at https://github.com/kittenbark/tg-tiktok-archive"))).
 		Command("/info", tg.Synced(arch.tgHandlerInfo)).
 		Filter(arch.onAdmin).
 		Command("/add", tg.Synced(arch.tgHandlerAdd)).
+		Command("/bundle", tg.Synced(arch.tgHandlerBundle)).
 		Command("/du", tg.Synced(arch.tgHandlerDu)).
 		Start()
 }

@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
+	"github.com/kittenbark/tg-tiktok-archive/internal/archive"
 	"log"
 	"log/slog"
-	"tg-tiktok-archive/internal/archive"
 )
 
 func main() {

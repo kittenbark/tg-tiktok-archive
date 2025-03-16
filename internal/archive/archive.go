@@ -58,6 +58,7 @@ func (arch *Archive) Start() {
 	slog.Info("archive#start")
 	ticker := time.NewTicker(time.Minute * time.Duration(arch.cfg.TimeoutMinutes))
 	for ; ; <-ticker.C {
+		start := time.Now()
 		tags, err := arch.users.KeysSnapshot()
 		if err != nil {
 			slog.Error("archive#keys_snapshot", "err", err)
@@ -75,7 +76,7 @@ func (arch *Archive) Start() {
 			}
 		}
 
-		slog.Info("archive#done")
+		slog.Info("archive#done", "elapsed", time.Since(start))
 	}
 }
 
