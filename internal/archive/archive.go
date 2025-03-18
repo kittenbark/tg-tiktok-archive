@@ -182,12 +182,16 @@ func (arch *Archive) newError(post *tikwm.UserPost, tag string, err error) {
 	}
 	slog.Error("archive#user", "post", post.Id, "tag", tag, "err", err)
 
-	if err := arch.errors.Add(post.Id, &PostError{
-		PostId:  post.Id,
+	arch.newErrorId(post.Id, tag, err)
+}
+
+func (arch *Archive) newErrorId(postId string, tag string, err error) {
+	if err := arch.errors.Add(postId, &PostError{
+		PostId:  postId,
 		UserTag: tag,
-		Error:   fmt.Sprintf("tikwm: get user post, %v (%s, %s)", err, tag, post.Id),
+		Error:   fmt.Sprintf("tikwm: get user post, %v (%s, %s)", err, tag, postId),
 	}); err != nil {
-		slog.Error("archive#new_error_write_error", "post", post.Id, "tag", tag, "err", err)
+		slog.Error("archive#new_error_write_error", "post", postId, "tag", tag, "err", err)
 	}
 	time.Sleep(time.Second * 10)
 }

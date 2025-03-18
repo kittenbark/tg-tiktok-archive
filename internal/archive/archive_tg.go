@@ -36,7 +36,8 @@ func (arch *Archive) UploadTg() error {
 			return fmt.Errorf("tg_archive: get post, %w", err)
 		}
 		if err := arch.uploadPost(post); err != nil {
-			return fmt.Errorf("tg_archive: upload post, %w", err)
+			arch.newErrorId(post.Id, post.Tag, err)
+			//return fmt.Errorf("tg_archive: upload post, %w", err)
 		}
 	}
 
