@@ -1,10 +1,10 @@
 package archive
 
 import (
-	"archive/tar"
 	"context"
 	"fmt"
 	"github.com/kittenbark/tg"
+	"github.com/kittenbark/tgmedia/tgarchive"
 	tikwm "github.com/kittenbark/tikwm/lib"
 	"io/fs"
 	"os"
@@ -136,30 +136,14 @@ func (arch *Archive) tgHandlerBundle(ctx context.Context, upd *tg.Update) (err e
 		_, _ = tg.DeleteMessage(ctx, chatId, messageId)
 	}(ctx, msg.Chat.Id, progress.MessageId)
 
-	filename := fmt.Sprintf("%s_%s.tar", tag, time.Now().Format(time.DateOnly))
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return err
-	}
-	defer func(file *os.File) {
-		_ = file.Close()
-		_ = os.Remove(filename)
-	}(file)
-	bundle := tar.NewWriter(file)
-	defer func(writer *tar.Writer) { _ = writer.Close() }(bundle)
+	_, err = tgarchive.SendBy2GB(
+		ctx,
+		msg.Chat.Id,
+		directory,
+		fmt.Sprintf("%s_%s", tag, time.Now().Format(time.DateOnly)),
+		&tg.OptSendDocument{ReplyParameters: asReply},
+	)
 
-	if err := bundle.AddFS(os.DirFS(directory)); err != nil {
-		return err
-	}
-	if err := bundle.Flush(); err != nil {
-		return err
-	}
-
-	_, _ = tg.EditMessageText(ctx, "uploading..", &tg.OptEditMessageText{
-		ChatId:    progress.Chat.Id,
-		MessageId: progress.MessageId,
-	})
-	_, err = tg.SendDocument(ctx, msg.Chat.Id, tg.FromDisk(filename), &tg.OptSendDocument{ReplyParameters: asReply})
 	return err
 }
 

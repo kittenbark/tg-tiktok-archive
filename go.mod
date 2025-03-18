@@ -7,6 +7,6 @@ require (
 	github.com/goccy/go-yaml v1.16.0
 	github.com/kittenbark/nanodb v0.0.0-20250316121037-fcaf87e49c07
 	github.com/kittenbark/tg v0.0.0-20250314194103-83aaac3f0eec
-	github.com/kittenbark/tgmedia v0.0.0-20250315155127-d27d6f300b88
+	github.com/kittenbark/tgmedia v0.0.0-20250317200942-ed56abcaf8e3
 	github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28
 )

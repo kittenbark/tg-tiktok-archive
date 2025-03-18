@@ -1,5 +1,6 @@
 github.com/cavaliergopher/grab/v3 v3.0.1 h1:4z7TkBfmPjmLAAmkkAZNX/6QJ1nNFdv3SdIHXju0Fr4=
 github.com/cavaliergopher/grab/v3 v3.0.1/go.mod h1:1U/KNnD+Ft6JJiYoYBAimKH2XrYptb8Kl3DFGmsjpq4=
+github.com/goccy/go-yaml v1.16.0 h1:d7m1G7A0t+logajVtklHfDYJs2Et9g3gHwdBNNFou0w=
 github.com/goccy/go-yaml v1.16.0/go.mod h1:XBurs7gK8ATbW4ZPGKgcbrY1Br56PdM69F7LkFRi1kA=
 github.com/kittenbark/nanodb v0.0.0-20250315193909-128d0012af2a h1:ZmhT3MRoSgrO8XAkTkVnkjnEHYInDw4PcJJAXizPn0U=
 github.com/kittenbark/nanodb v0.0.0-20250315193909-128d0012af2a/go.mod h1:gL10rTGdHYHWhOE//bAfeZXEiy2YiqAyEZtKyn9AcYc=
@@ -9,6 +10,8 @@ github.com/kittenbark/tg v0.0.0-20250314194103-83aaac3f0eec h1:cnXF8mm3qnJqoqWbr
 github.com/kittenbark/tg v0.0.0-20250314194103-83aaac3f0eec/go.mod h1:n84Rl0h0IaG+pLij7L9PSwErJCbG755uoqf3pLhw4BY=
 github.com/kittenbark/tgmedia v0.0.0-20250315155127-d27d6f300b88 h1:7hAksq7M691GY9K4/OBSQAXPSpYsY6MPVnr1s0owlhc=
 github.com/kittenbark/tgmedia v0.0.0-20250315155127-d27d6f300b88/go.mod h1:aZDp5uJQZBtDsyVy3jKWpDfKWQNybRpYV4wysEtHsHw=
+github.com/kittenbark/tgmedia v0.0.0-20250317200942-ed56abcaf8e3 h1:SO+CkH8SujuOrqd7Xnk67qcr3Xh4Dm/ZWnPUpJUO4QM=
+github.com/kittenbark/tgmedia v0.0.0-20250317200942-ed56abcaf8e3/go.mod h1:aZDp5uJQZBtDsyVy3jKWpDfKWQNybRpYV4wysEtHsHw=
 github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28 h1:SYGoOO7gCIYLth1EhY4dbTbS/4ERzn/dQMZKyDRrD8s=
 github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28/go.mod h1:zY9LxDTu97oSu4Tgl4sP8UgrpY8StCPgECnS2kV65eE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
