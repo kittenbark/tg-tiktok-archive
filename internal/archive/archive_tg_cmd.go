@@ -118,16 +118,6 @@ func (arch *Archive) tgHandlerBundle(ctx context.Context, upd *tg.Update) (err e
 		return err
 	}
 
-	directory := path.Join(arch.cfg.Data, tag)
-	directorySize, err := calcDirSize(directory)
-	if err != nil {
-		return err
-	}
-	if directorySize > 1900<<20 {
-		_, err := tg.SendMessage(ctx, msg.Chat.Id, fmt.Sprintf("sorry, '%s' is too big for tg (%s)", tag, du(directory)))
-		return err
-	}
-
 	progress, err := tg.SendMessage(ctx, msg.Chat.Id, "packing..", &tg.OptSendMessage{ReplyParameters: asReply})
 	if err != nil {
 		return err
@@ -139,7 +129,7 @@ func (arch *Archive) tgHandlerBundle(ctx context.Context, upd *tg.Update) (err e
 	_, err = tgarchive.SendBy2GB(
 		ctx,
 		msg.Chat.Id,
-		directory,
+		path.Join(arch.cfg.Data, tag),
 		fmt.Sprintf("%s_%s", tag, time.Now().Format(time.DateOnly)),
 		&tg.OptSendDocument{ReplyParameters: asReply},
 	)
