@@ -12,6 +12,8 @@ github.com/kittenbark/tgmedia v0.0.0-20250315155127-d27d6f300b88 h1:7hAksq7M691G
 github.com/kittenbark/tgmedia v0.0.0-20250315155127-d27d6f300b88/go.mod h1:aZDp5uJQZBtDsyVy3jKWpDfKWQNybRpYV4wysEtHsHw=
 github.com/kittenbark/tgmedia v0.0.0-20250317200942-ed56abcaf8e3 h1:SO+CkH8SujuOrqd7Xnk67qcr3Xh4Dm/ZWnPUpJUO4QM=
 github.com/kittenbark/tgmedia v0.0.0-20250317200942-ed56abcaf8e3/go.mod h1:aZDp5uJQZBtDsyVy3jKWpDfKWQNybRpYV4wysEtHsHw=
+github.com/kittenbark/tgmedia v0.0.0-20250318170530-76d78514696d h1:FwItwor3U5EEwPSmyWPzQetnOtEBle2T43uOusHDdxA=
+github.com/kittenbark/tgmedia v0.0.0-20250318170530-76d78514696d/go.mod h1:aZDp5uJQZBtDsyVy3jKWpDfKWQNybRpYV4wysEtHsHw=
 github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28 h1:SYGoOO7gCIYLth1EhY4dbTbS/4ERzn/dQMZKyDRrD8s=
 github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28/go.mod h1:zY9LxDTu97oSu4Tgl4sP8UgrpY8StCPgECnS2kV65eE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
