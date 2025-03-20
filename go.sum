@@ -18,6 +18,8 @@ github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28 h1:SYGoOO7gCIYLth
 github.com/kittenbark/tikwm v0.0.0-20250308165549-35c262620a28/go.mod h1:zY9LxDTu97oSu4Tgl4sP8UgrpY8StCPgECnS2kV65eE=
 github.com/kittenbark/tikwm v0.0.0-20250320162621-1834f6986a96 h1:K9YM6e+XF8TAiMYT6W8fHJS5pvCuiwpPin3cxJS58w4=
 github.com/kittenbark/tikwm v0.0.0-20250320162621-1834f6986a96/go.mod h1:zY9LxDTu97oSu4Tgl4sP8UgrpY8StCPgECnS2kV65eE=
+github.com/kittenbark/tikwm v0.0.0-20250320170322-85f919c513e6 h1:HQvYPqyT+aDXSASw+/Rlj95wDB4E+JjgWR0p0v+D7EE=
+github.com/kittenbark/tikwm v0.0.0-20250320170322-85f919c513e6/go.mod h1:zY9LxDTu97oSu4Tgl4sP8UgrpY8StCPgECnS2kV65eE=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

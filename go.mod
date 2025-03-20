@@ -8,5 +8,5 @@ require (
 	github.com/kittenbark/nanodb v0.0.0-20250316121037-fcaf87e49c07
 	github.com/kittenbark/tg v0.0.0-20250314194103-83aaac3f0eec
 	github.com/kittenbark/tgmedia v0.0.0-20250318170530-76d78514696d
-	github.com/kittenbark/tikwm v0.0.0-20250320162621-1834f6986a96
+	github.com/kittenbark/tikwm v0.0.0-20250320170322-85f919c513e6
 )
