@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"github.com/kittenbark/tg"
 	"github.com/kittenbark/tgmedia/tgvideo"
+	"log/slog"
 	"slices"
 	"strings"
+	"time"
 )
 
 type TgArchive struct {
@@ -16,6 +18,10 @@ type TgArchive struct {
 }
 
 func (arch *Archive) UploadTg() error {
+	start := time.Now()
+	slog.Debug("archive#upload_tg")
+	defer slog.Debug("archive#upload_tg_done", "elapsed", time.Since(start))
+
 	posts, err := arch.downloaded.KeysSnapshot()
 	if err != nil {
 		return fmt.Errorf("tg_archive: upload, keys snapshot, %w", err)

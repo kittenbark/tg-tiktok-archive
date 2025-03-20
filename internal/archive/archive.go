@@ -107,6 +107,7 @@ func (arch *Archive) DownloadUser(tag string) error {
 
 	lastUpdate := time.Now()
 	slog.Debug("archive#DownloadUser", "tag", tag, "user", user.Id)
+	defer slog.Debug("archive#DownloadUser_complete", "tag", tag, "user", user.Id, "elapsed", time.Since(lastUpdate))
 	for post, err := range tikwm.FeedSeq(user.Id) {
 		if err != nil || post == nil {
 			arch.newError(post, tag, fmt.Errorf("tikwm: get user post, %w (%s)", err, tag))
