@@ -3,11 +3,15 @@ package archive
 import "time"
 
 type Config struct {
-	Token          string  `yaml:"token"`
-	TelegramURL    string  `yaml:"telegram_url"`
-	Data           string  `yaml:"data"`
-	Admins         []int64 `yaml:"admins"`
-	TimeoutMinutes int     `yaml:"timeout_minutes"`
+	Token       string  `yaml:"token"`
+	TelegramURL string  `yaml:"telegram_url"`
+	Data        string  `yaml:"data"`
+	Admins      []int64 `yaml:"admins"`
+	Sleep       struct {
+		FromHour  int `yaml:"from_hour"`
+		UntilHour int `yaml:"until_hour"`
+	} `yaml:"sleep"`
+	TimeoutMinutes int `yaml:"timeout_minutes"`
 }
 
 type UserTg struct {

@@ -63,6 +63,11 @@ func (arch *Archive) Start() {
 	slog.Info("archive#start")
 	ticker := time.NewTicker(time.Minute * time.Duration(arch.cfg.TimeoutMinutes))
 	for ; ; <-ticker.C {
+		if arch.shouldSleep() {
+			slog.Info("archive#sleep")
+			continue
+		}
+
 		start := time.Now()
 		tags, err := arch.users.KeysSnapshot()
 		if err != nil {
@@ -223,6 +228,20 @@ func (arch *Archive) picturePath(tag string, username string, post *tikwm.UserPo
 			i,
 		),
 	)
+}
+
+func (arch *Archive) shouldSleep() bool {
+	if arch.cfg.Sleep.FromHour == arch.cfg.Sleep.UntilHour {
+		return false
+	}
+
+	now := time.Now()
+	until := arch.cfg.Sleep.UntilHour
+	if arch.cfg.Sleep.FromHour > until {
+		until += 24
+	}
+
+	return arch.cfg.Sleep.FromHour <= now.Hour() && now.Hour() < until
 }
 
 func yamlNewEncoder(w io.Writer) *yaml.Encoder {
